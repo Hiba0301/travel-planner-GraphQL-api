@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum TripStatus {
+  planned
+  ongoing
+  completed
+}
+
+enum ActivityCategory {
+  culture
+  sport
+  food
+  nature
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  avatar    String?
+  createdAt DateTime  @default(now())
+  trips     Trip[]
+  reviews   Review[]
+  bookings  Booking[]
+}
+
+model Trip {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  budget       Float
+  currency     String        @default("USD")
+  startDate    String
+  endDate      String
+  status       TripStatus    @default(planned)
+  createdAt    DateTime      @default(now())
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int
+  destinations Destination[]
+  bookings     Booking[]
+
+  @@index([userId, title, startDate, endDate])
+}
+
+model Destination {
+  id            Int        @id @default(autoincrement())
+  name          String
+  country       String
+  city          String
+  imageUrl      String?
+  arrivalDate   String
+  departureDate String
+  trip          Trip       @relation(fields: [tripId], references: [id])
+  tripId        Int
+  activities    Activity[]
+  reviews       Review[]
+
+  @@index([tripId, name, arrivalDate, departureDate])
+}
+
+model Activity {
+  id            Int              @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  duration      Int // en minutes
+  category      ActivityCategory
+  destination   Destination      @relation(fields: [destinationId], references: [id])
+  destinationId Int
+  bookings      Booking[]
+
+  @@index([destinationId, name])
+}
+
+model Booking {
+  id         Int           @id @default(autoincrement())
+  status     BookingStatus @default(pending)
+  bookedAt   DateTime      @default(now())
+  totalPrice Float
+  user       User          @relation(fields: [userId], references: [id])
+  userId     Int
+  trip       Trip          @relation(fields: [tripId], references: [id])
+  tripId     Int
+  activity   Activity      @relation(fields: [activityId], references: [id])
+  activityId Int
+
+  @@index([userId, tripId, activityId])
+}
+
+model Review {
+  id            Int         @id @default(autoincrement())
+  rating        Int // 1 à 5
+  comment       String
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  destinationId Int
+
+  @@index([userId, destinationId])
+}

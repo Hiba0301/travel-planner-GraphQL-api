@@ -1,0 +1,43 @@
+{
+  "name": "travel-planner-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "seed": "npx prisma db seed",
+    "studio": "npx prisma studio",
+    "import:external": "node prisma/import-external.js",
+    "import:live": "node prisma/import-external.js --source live-api",
+    "client:dev": "npm --prefix client run dev",
+    "client:build": "npm --prefix client run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.2"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "@graphql-tools/schema": "^10.0.31",
+    "@prisma/client": "^6.19.2",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "csv-parse": "^6.2.1",
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.3.2",
+    "graphql": "^16.13.2",
+    "graphql-subscriptions": "^3.0.0",
+    "graphql-ws": "^6.0.8",
+    "jsonwebtoken": "^9.0.3",
+    "ws": "^8.20.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
