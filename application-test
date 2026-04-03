@@ -1,0 +1,109 @@
+Donc dans Apollo Sandbox:
+
+---si Query
+
+1.Ouvre Headers
+2.Supprime API_CLIENT_ID et API_CLIENT_SECRET
+3.Ajoute:
+x-client-id: travel-client
+x-client-secret: travel-secret
+ex:
+query {
+  trips {
+    title
+    budget
+    startDate
+    endDate
+    user { name email }
+    destinations {
+      name
+      country
+      activities { name category price }
+    }
+  }
+}
+
+query {
+  tripsByBudget(max: 3000) {
+    title
+    budget
+    user { name }
+  }
+}
+
+query {
+  tripsByStatus(status: "completed") {
+    title
+    destinations { name country }
+  }
+}
+
+
+---si mutation:
+
+1.Lance d’abord la mutation login pour récupérer le token:
+mutation Login {
+  login(email: "EMAIL_IMPORTÉ", password: "external_live_api_import") {
+    token
+    user { id name email }
+  }
+}
+2.Copie la valeur token retournée.
+3.Va dans Headers et remplace TON_JWT par ce token
+4.on lance la mutation
+
+ex:
+mutation {
+  createTrip(
+    title: "Trip to Bali"
+    description: "Amazing trip to Bali"
+    budget: 2500
+    currency: "USD"
+    startDate: "2024-06-01"
+    endDate: "2024-06-14"
+    userId: "1"
+  ) {
+    id
+    title
+    budget
+    status
+    user { name }
+  }
+}
+
+mutation {
+  updateTripStatus(id: "1", status: "ongoing") {
+    id
+    title
+    status
+  }
+}
+
+mutation {
+  addDestination(
+    name: "Bali"
+    country: "Indonesia"
+    city: "Denpasar"
+    imageUrl: "https://source.unsplash.com/800x600/?bali"
+    arrivalDate: "2024-06-01"
+    departureDate: "2024-06-14"
+    tripId: "1"
+  ) {
+    id
+    name
+    country
+    city
+  }
+}
+
+
+--- si Subscriptions:
+
+subscription {
+  tripCreated {
+    id
+    title
+    budget
+    user { name }
+  }
+}

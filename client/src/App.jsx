@@ -228,7 +228,7 @@ function App() {
         <p className="kicker">Travel Planner • Phase 2</p>
         <h1>Client React GraphQL</h1>
         <p className="lead">
-          Interface cliente minimale pour tester la securite, les queries et les mutations de ton API.
+          Interface cliente minimale pour tester la securite, les queries et les mutations de l'API.
         </p>
       </header>
 

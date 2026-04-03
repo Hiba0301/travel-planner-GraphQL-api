@@ -2,6 +2,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const { parse: parseCsv } = require('csv-parse/sync');
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -379,14 +380,34 @@ async function importRecord(normalized, counters, dryRun) {
     return;
   }
 
-  const user = await prisma.user.upsert({
+  const importedPassword = String(normalized.user.password || 'external_import_demo');
+  const isBcryptHash = /^\$2[aby]\$\d{2}\$/.test(importedPassword);
+  const hashedPassword = isBcryptHash ? importedPassword : await bcrypt.hash(importedPassword, 10);
+
+  const existingUser = await prisma.user.findUnique({
     where: { email: normalized.user.email },
-    update: {
-      name: normalized.user.name,
-      avatar: normalized.user.avatar,
-    },
-    create: normalized.user,
+    select: { id: true, password: true },
   });
+
+  let user;
+  if (existingUser) {
+    const existingIsBcryptHash = /^\$2[aby]\$\d{2}\$/.test(String(existingUser.password || ''));
+    user = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        name: normalized.user.name,
+        avatar: normalized.user.avatar,
+        ...(existingIsBcryptHash ? {} : { password: hashedPassword }),
+      },
+    });
+  } else {
+    user = await prisma.user.create({
+      data: {
+        ...normalized.user,
+        password: hashedPassword,
+      },
+    });
+  }
 
   let trip = await prisma.trip.findFirst({
     where: {
