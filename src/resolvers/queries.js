@@ -9,6 +9,7 @@ const tripInclude = {
   bookings: true
 };
 
+// Construit un objet de filtres Prisma reutilisable pour les listes de trips.
 function buildTripWhere(args, userId) {
   const where = {};
 
@@ -38,7 +39,7 @@ function buildTripWhere(args, userId) {
 }
 
 module.exports = {
-  // Users
+  // USERS (lectures protegees)
   users: (_parent, _args, context) => {
     requireAuth(context);
     return prisma.user.findMany({ include: { trips: true, reviews: true, bookings: true } });
@@ -58,8 +59,9 @@ module.exports = {
     });
   },
 
-  // Trips
+  // TRIPS
   trips: (_, args) => {
+    // Applique filtres, tri et pagination dans une seule requete Prisma.
     const where = buildTripWhere(args);
 
     const sortFieldMap = {
@@ -80,10 +82,12 @@ module.exports = {
       include: tripInclude,
     };
 
+    // limit -> take: nombre max de lignes retournees.
     if (Number.isInteger(args.limit) && args.limit > 0) {
       query.take = args.limit;
     }
 
+    // offset -> skip: nombre de lignes ignorees avant retour.
     if (Number.isInteger(args.offset) && args.offset >= 0) {
       query.skip = args.offset;
     }
@@ -99,6 +103,7 @@ module.exports = {
     return prisma.trip.findMany({ where: { userId: Number(userId) }, include: tripInclude });
   },
   myTrips: (_parent, args, context) => {
+    // Meme logique que trips, mais limitee a l'utilisateur authentifie.
     const authUser = requireAuth(context);
     const where = buildTripWhere(args, authUser.id);
 
@@ -148,11 +153,12 @@ module.exports = {
     };
   },
 
-  // Destinations
+  // DESTINATIONS
   destinations: () => prisma.destination.findMany({ include: { activities: true, reviews: true } }),
   destination: (_, { id }) => prisma.destination.findUnique({ where: { id: Number(id) }, include: { activities: true, reviews: true } }),
   destinationsByCountry: (_, { country }) => prisma.destination.findMany({ where: { country }, include: { activities: true, reviews: true } }),
   searchDestinations: (_parent, { keyword, country }) =>
+    // Recherche plein texte sur name/city/country + filtre exact optionnel par pays.
     prisma.destination.findMany({
       where: {
         AND: [
@@ -169,12 +175,12 @@ module.exports = {
       include: { activities: true, reviews: true },
     }),
 
-  // Activities
+  // ACTIVITIES
   activities: () => prisma.activity.findMany({ include: { destination: true } }),
   activitiesByDestination: (_, { destinationId }) => prisma.activity.findMany({ where: { destinationId: Number(destinationId) } }),
   activitiesByCategory: (_, { category }) => prisma.activity.findMany({ where: { category } }),
 
-  // Bookings
+  // BOOKINGS
   bookings: (_parent, _args, context) => {
     const authUser = requireAuth(context);
     return prisma.booking.findMany({
@@ -200,7 +206,7 @@ module.exports = {
     });
   },
 
-  // Reviews
+  // REVIEWS
   reviews: () => prisma.review.findMany({ include: { user: true, destination: true } }),
   reviewsByDestination: (_, { destinationId }) => prisma.review.findMany({ where: { destinationId: Number(destinationId) }, include: { user: true } }),
 };

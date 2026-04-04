@@ -1,5 +1,7 @@
 const typeDefs = `#graphql
 
+  # Entites metier principales du domaine travel planner.
+
   type User {
     id: ID!
     name: String!
@@ -95,6 +97,7 @@ const typeDefs = `#graphql
   }
 
   # ───── QUERIES ─────
+  # Operations de lecture (filtres, tri, pagination sur les listes de trips).
   type Query {
     # Users
     users: [User!]!
@@ -107,8 +110,10 @@ const typeDefs = `#graphql
       currency: String
       minBudget: Float
       maxBudget: Float
+      # limit/offset: pagination de type page-based (take/skip cote Prisma).
       limit: Int
       offset: Int
+      # Tri parametre par enum pour eviter des champs arbitraires.
       sortBy: TripSortField = CREATED_AT
       sortOrder: SortOrder = desc
     ): [Trip!]!
@@ -147,6 +152,7 @@ const typeDefs = `#graphql
   }
 
   # ───── MUTATIONS ─────
+  # Operations d'ecriture; les plus sensibles sont protegees dans les resolvers.
   type Mutation {
     # Users
     register(
@@ -221,6 +227,7 @@ const typeDefs = `#graphql
   }
 
   # ───── SUBSCRIPTIONS ─────
+  # Evenements temps reel publies depuis certaines mutations.
   type Subscription {
     tripCreated: Trip!
     bookingCreated: Booking!

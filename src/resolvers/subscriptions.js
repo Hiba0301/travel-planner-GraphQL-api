@@ -1,6 +1,7 @@
 const { pubsub } = require('./mutations');
 const { requireAuth } = require('../auth');
 
+// Petit wrapper d'iterateur asynchrone autour de PubSub.
 function createAsyncIterator(engine, triggerName) {
   const pullQueue = [];
   const pushQueue = [];
@@ -34,6 +35,7 @@ function createAsyncIterator(engine, triggerName) {
     }
 
     listening = false;
+    // Nettoie l'abonnement PubSub quand le client se deconnecte.
     if (subscriptionId !== undefined) {
       await engine.unsubscribe(subscriptionId);
     }
@@ -70,18 +72,21 @@ function createAsyncIterator(engine, triggerName) {
 module.exports = {
   tripCreated: {
     subscribe: (_parent, _args, context) => {
+      // Toutes les subscriptions exigent un utilisateur authentifie.
       requireAuth(context);
       return createAsyncIterator(pubsub, 'TRIP_CREATED');
     }
   },
   bookingCreated: {
     subscribe: (_parent, _args, context) => {
+      // Toutes les subscriptions exigent un utilisateur authentifie.
       requireAuth(context);
       return createAsyncIterator(pubsub, 'BOOKING_CREATED');
     }
   },
   reviewAdded: {
     subscribe: (_parent, _args, context) => {
+      // Toutes les subscriptions exigent un utilisateur authentifie.
       requireAuth(context);
       return createAsyncIterator(pubsub, 'REVIEW_ADDED');
     }

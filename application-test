@@ -38,6 +38,16 @@ query {
   }
 }
 
+query {
+  trips(limit: 5, offset: 10, sortBy: CREATED_AT, sortOrder: desc) {
+    id
+    title
+    budget
+    status
+    createdAt
+  }
+}
+
 
 ---si mutation:
 
@@ -49,7 +59,7 @@ mutation Login {
   }
 }
 2.Copie la valeur token retournée.
-3.Va dans Headers et remplace TON_JWT par ce token
+3.Va dans Headers et met dans Authorization la valeur du token (Authorization:'token')
 4.on lance la mutation
 
 ex:

@@ -51,7 +51,7 @@ Optional live import:
 ```bash
 npm run import:live -- --mode reset --limit 10
 ```
-
+\\data is imported from this kaggle dataset :https://www.kaggle.com/datasets/rkiattisak/traveler-trip-data
 ## Run API
 
 Development mode:
@@ -69,7 +69,7 @@ npm start
 Endpoints:
 - HTTP GraphQL: `http://localhost:4000/graphql`
 - WebSocket subscriptions: `ws://localhost:4000/graphql`
--prisma studio:npx prisma studio
+-prisma studio: npx prisma studio
 
 ## Petite interface cliente React (Phase 2)
 

@@ -15,6 +15,7 @@ const tripInclude = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Validation minimale des donnees d'inscription.
 function validateCredentials(email, password) {
   if (!emailPattern.test(String(email).trim().toLowerCase())) {
     throw new Error('Invalid email format.');
@@ -25,6 +26,7 @@ function validateCredentials(email, password) {
   }
 }
 
+// Controle de coherence temporelle reutilise sur trips/destinations.
 function ensureChronologicalDates(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -38,6 +40,7 @@ function ensureChronologicalDates(startDate, endDate) {
   }
 }
 
+// Verifie qu'un trip appartient bien a l'utilisateur courant.
 async function assertTripOwnership(tripId, authUserId) {
   const trip = await prisma.trip.findUnique({
     where: { id: Number(tripId) },
@@ -100,6 +103,7 @@ const mutations = {
       throw new Error('Invalid credentials.');
     }
 
+    // JWT utilise ensuite dans les operations protegees (query/mutation/subscription).
     const token = signAccessToken(user);
     return { token, user };
   },
@@ -137,6 +141,7 @@ const mutations = {
       },
       include: tripInclude
     });
+    // Notifie les clients abonnes en temps reel.
     pubsub.publish('TRIP_CREATED', { tripCreated: trip });
     return trip;
   },
@@ -151,6 +156,7 @@ const mutations = {
     const authUser = requireAuth(context);
     await assertTripOwnership(id, authUser.id);
 
+    // Suppression manuelle en cascade (booking -> activity/review -> destination -> trip).
     const numId = Number(id);
     await prisma.booking.deleteMany({ where: { tripId: numId } });
     const destinations = await prisma.destination.findMany({ where: { tripId: numId } });
@@ -246,6 +252,7 @@ const mutations = {
       },
       include: { user: true, trip: true, activity: true }
     });
+    // Notifie les clients abonnes en temps reel.
     pubsub.publish('BOOKING_CREATED', { bookingCreated: booking });
     return booking;
   },
@@ -310,6 +317,7 @@ const mutations = {
       },
       include: { user: true, destination: true }
     });
+    // Notifie les clients abonnes en temps reel.
     pubsub.publish('REVIEW_ADDED', { reviewAdded: review });
     return review;
   }
